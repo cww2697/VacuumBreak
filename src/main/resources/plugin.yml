@@ -1,0 +1,8 @@
+name: vacuumbreak
+version: 0.1.0
+main: net.canyonwolf.VacuumBreak
+description: Automated Backup for Spigot Servers
+author: Cody West
+website: https://canyonwolf.net
+api-version: '1.19.2'
+load: POSTWORLD
