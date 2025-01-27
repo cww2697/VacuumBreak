@@ -1,1 +1,6 @@
-outputDir=./backups
+backup-every-hours: 24
+snapshot-count: 2
+include-nether: true
+include-end: true
+backup-dir: /backups
+silent: false
