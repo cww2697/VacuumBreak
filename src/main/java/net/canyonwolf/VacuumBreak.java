@@ -1,5 +1,7 @@
 package net.canyonwolf;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -17,13 +19,18 @@ public class VacuumBreak extends JavaPlugin {
         backup.setLogger(getLogger());
         backup.setSilent(getConfig().getBoolean("silent"));
         this.buildFilePaths();
-        BackupService.pack("world", this.sourceDirectory, this.backupDirectory);
+        //Todo: implement auto run functionality
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
+        //Todo: Implement commands
+        return false;
     }
 
     private void buildFilePaths() {
         this.sourceDirectory = this.getDataFolder().getPath() +
                 File.separator + ".." + File.separator + ".." + File.separator;
-
 
         this.backupDirectory = this.getDataFolder().getPath() +
                 File.separator + getConfig().getString("backup-dir");
@@ -35,7 +42,6 @@ public class VacuumBreak extends JavaPlugin {
             this.getLogger().warning("Disabling VacuumBreak...");
             this.getServer().getPluginManager().disablePlugin(this);
         }
-
     }
 
     @Override
