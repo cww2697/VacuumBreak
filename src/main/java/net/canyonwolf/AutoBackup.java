@@ -1,7 +1,5 @@
 package net.canyonwolf;
 
-import org.bukkit.configuration.file.FileConfiguration;
-
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
@@ -9,6 +7,7 @@ public class AutoBackup extends TimerTask {
 
     String sourceDirectory;
     String targetDirectory;
+    int snapshotCount;
     Boolean silent;
     Boolean includeNether;
     Boolean includeEnd;
@@ -17,6 +16,7 @@ public class AutoBackup extends TimerTask {
     public AutoBackup(
             String sourceDir,
             String targetDir,
+            int snapshotCount,
             Boolean silent,
             Boolean includeNether,
             Boolean includeEnd,
@@ -24,6 +24,7 @@ public class AutoBackup extends TimerTask {
     ) {
         this.sourceDirectory = sourceDir;
         this.targetDirectory = targetDir;
+        this.snapshotCount = snapshotCount;
         this.silent = silent;
         this.includeNether = includeNether;
         this.includeEnd = includeEnd;
@@ -35,12 +36,15 @@ public class AutoBackup extends TimerTask {
         BackupService backupService = new BackupService();
         backupService.setLogger(logger);
         backupService.setSilent(silent);
-        if (!silent){
-            logger.info("Starting automated backup...");
-        }
+        backupService.setMaxSnapshotCount(snapshotCount);
+
+        logger.info("Starting automated backup...");
+        long start = System.nanoTime();
         BackupService.backup(sourceDirectory, targetDirectory, includeNether, includeEnd);
-        if (!silent){
-            logger.info("Finished automated backup...");
-        }
+        long elapsed = System.nanoTime() - start;
+        float seconds = ((float) elapsed / 1000000000);
+        String secondsStr = String.format("%.3f", seconds);
+        logger.info("Finished automated backup... (" + secondsStr + " seconds)");
+
     }
 }

@@ -66,6 +66,7 @@ public class VacuumBreak extends JavaPlugin {
                 new AutoBackup(
                         sourceDirectory,
                         backupDirectory,
+                        getConfig().getInt("snapshot-count"),
                         getConfig().getBoolean("silent"),
                         getConfig().getBoolean("include-nether"),
                         getConfig().getBoolean("include-end"),

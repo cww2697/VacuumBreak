@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -18,63 +20,84 @@ public class BackupService {
     private static Logger logger;
     private static Boolean silent;
 
+    private static int maxSnapshotCount;
+
 
     public static void backup(String sourceDir, String targetDir, boolean includeNether, boolean includeEnd) {
 
         String sdf = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
-        if (!silent) {
-            logger.info("Backup started on world: world");
+        if (getCurrentSnapshotCount(targetDir) >= maxSnapshotCount) {
+            if (!silent){
+                logger.info("Maximum snapshot count exceeded. Removing oldest snapshot.");
+                removeSnapshot(targetDir);
+            }
         }
+
         try {
+            if (!silent) {
+                logger.info("Backup started on world: world");
+            }
+            long start = System.nanoTime();
             pack("world", sourceDir + File.separator + "world", targetDir + File.separator + sdf + "_world.zip");
+            long elapsed = System.nanoTime() - start;
+            float seconds = ((float) elapsed / 1000000000);
+            String secondsStr = String.format("%.3f", seconds);
+            if(!silent) {
+                logger.info("Backup completed on world: world (" + secondsStr + " seconds)");
+            }
         } catch (RuntimeException e) {
             if (!silent) {
                 logger.warning(e.getMessage());
             }
             logger.warning("Unable to backup world: world. Skipping...");
         }
-        if(!silent) {
-            logger.info("Backup completed on world: world");
-        }
 
         if (includeNether) {
-            if (!silent) {
-                logger.info("Backup started on world: world_nether");
-            }
             try {
+                if (!silent) {
+                    logger.info("Backup started on world: world_nether");
+                }
+                long start = System.nanoTime();
                 pack("world_nether", sourceDir + File.separator + "world_the_end", targetDir + File.separator + sdf + "_world_nether.zip");
+                long elapsed = System.nanoTime() - start;
+                float seconds = ((float) elapsed / 1000000000);
+                String secondsStr = String.format("%.3f", seconds);
+                if(!silent) {
+                    logger.info("Backup completed on world: world_nether (" + secondsStr + " seconds)");
+                }
             } catch (RuntimeException e) {
                 if (!silent) {
                     logger.warning(e.getMessage());
                 }
                 logger.warning("Unable to backup world: world_nether. Skipping...");
             }
-            if(!silent) {
-                logger.info("Backup completed on world: world_nether");
-            }
         }
 
         if (includeEnd) {
-            if (!silent) {
-                logger.info("Backup started on world: world_the_end");
-            }
             try{
+                if (!silent) {
+                    logger.info("Backup started on world: world_the_end");
+                }
+                long start = System.nanoTime();
                 pack("world_the_end", sourceDir + File.separator + "world_the_end", targetDir + File.separator + sdf + "_world_the_end.zip");
+                long elapsed = System.nanoTime() - start;
+                float seconds = ((float) elapsed / 1000000000);
+                String secondsStr = String.format("%.3f", seconds);
+                if(!silent) {
+                    logger.info("Backup completed on world: world_the_end (" + secondsStr + " seconds)");
+                }
             } catch (RuntimeException e) {
                 if (!silent) {
                     logger.warning(e.getMessage());
                 }
                 logger.warning("Unable to backup world: world_the_end. Skipping...");
             }
-            if(!silent) {
-                logger.info("Backup completed on world: world_the_end");
-            }
         }
 
     }
 
-    public static void pack(String world, String sourceDir, String targetDir) throws RuntimeException{
+    private static void pack(String world, String sourceDir, String targetDir) throws RuntimeException{
         Path pp = Paths.get(sourceDir);
         boolean sourceExists = verifySourceDir(sourceDir, world);
         if (!sourceExists) {
@@ -90,7 +113,6 @@ public class BackupService {
             try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(target.toFile()))) {
                 File source = new File(sourceDir);
                 compressDirectory(source, source.getName(), zos);
-
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to create backup file for " + world, e);
@@ -98,11 +120,17 @@ public class BackupService {
     }
 
     private static void compressDirectory(File dir, String basePath, ZipOutputStream zos) throws IOException {
+
         File[] files = dir.listFiles();
+        assert files != null;
         for (File file : files) {
             if (file.isDirectory()) {
                 compressDirectory(file, basePath + "/" + file.getName(), zos);
             } else {
+                if (file.getName().endsWith(".lock")) {
+                    continue;
+                }
+
                 FileInputStream fis = new FileInputStream(file);
                 ZipEntry zipEntry = new ZipEntry(basePath + "/" + file.getName());
                 zos.putNextEntry(zipEntry);
@@ -139,12 +167,60 @@ public class BackupService {
         return true;
     }
 
+    private static int getCurrentSnapshotCount(String snapshotDir) {
+        int count = 0;
+        File source = new File(snapshotDir);
+        File[] files = source.listFiles();
+        assert files != null;
+        for (File file : files) {
+            if (file.getName().endsWith("world.zip")) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static void removeSnapshot(String snapshotDir) {
+        File directory = new File(snapshotDir);
+        File[] files = directory.listFiles();
+        if (files == null || files.length == 0) {
+            logger.warning("The directory is empty or cannot be accessed.");
+            return;
+        }
+
+        File oldestSnapshot = Arrays.stream(files)
+                .filter(File::isFile)
+                .min(Comparator.comparingLong(File::lastModified))
+                .orElse(null);
+
+        assert oldestSnapshot != null;
+        String oldestSnapshotTimestamp = oldestSnapshot.getName().substring(0, oldestSnapshot.getName().indexOf('_') + 1);
+
+        File[] matchingFiles = directory.listFiles((dir, name) -> name.contains(oldestSnapshotTimestamp));
+        if (matchingFiles == null || matchingFiles.length == 0) {
+            throw new RuntimeException("The directory " + directory + " does not contain any snapshot files.");
+        }
+
+        Arrays.stream(matchingFiles).forEach(BackupService::deleteSnapshot);
+    }
+
+    private static void deleteSnapshot(File snapshotFile) {
+        boolean success = snapshotFile.delete();
+        if (!success) {
+            throw new RuntimeException("Failed to delete snapshot " + snapshotFile.getAbsolutePath());
+        }
+    }
+
     public void setLogger(Logger logger) {
         BackupService.logger = logger;
     }
 
     public void setSilent(boolean silent) {
         BackupService.silent = silent;
+    }
+
+    public void setMaxSnapshotCount(int maxSnapshotCount) {
+        BackupService.maxSnapshotCount = maxSnapshotCount;
     }
 
 }
