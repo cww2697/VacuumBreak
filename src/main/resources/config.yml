@@ -1,5 +1,8 @@
+automated-backups: true
+prefer-hours: true
 backup-every-hours: 24
-snapshot-count: 2
+backup-every-minutes: 1
+snapshot-count: 5
 include-nether: true
 include-end: true
 backup-dir: /backups
