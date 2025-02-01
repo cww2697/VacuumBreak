@@ -1,4 +1,4 @@
-automated-backups: false
+automated-backups: true
 prefer-hours: true
 backup-every-hours: 24
 backup-every-minutes: 1
