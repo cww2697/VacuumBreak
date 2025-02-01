@@ -5,6 +5,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.Timer;
 
 public class VacuumBreak extends JavaPlugin {
 
@@ -19,13 +21,10 @@ public class VacuumBreak extends JavaPlugin {
         backup.setLogger(getLogger());
         backup.setSilent(getConfig().getBoolean("silent"));
         this.buildFilePaths();
-        //Todo: implement auto run functionality
-    }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
-        //Todo: Implement commands
-        return false;
+        if (this.getConfig().getBoolean("automated-backups")) {
+            scheduleTask();
+        }
     }
 
     private void buildFilePaths() {
@@ -42,6 +41,39 @@ public class VacuumBreak extends JavaPlugin {
             this.getLogger().warning("Disabling VacuumBreak...");
             this.getServer().getPluginManager().disablePlugin(this);
         }
+    }
+
+    private void scheduleTask() throws RuntimeException {
+        long miliseconds = 0;
+
+        if (!this.getConfig().getBoolean("prefer-hours")) {
+            int minutes = this.getConfig().getInt("backup-every-minutes");
+            if (!(minutes > 0)) {
+                throw new IllegalArgumentException("Backup minutes must be a positive integer");
+            }
+
+            miliseconds = minutes * 60000L;
+        } else {
+            int hours = this.getConfig().getInt("backup-every-hours");
+            if (!(hours > 0)) {
+                throw new IllegalArgumentException("Backup hours must be a positive integer");
+            }
+            miliseconds = hours * 3600000L;
+        }
+
+        Timer timer = new Timer();
+        timer.schedule(
+                new AutoBackup(
+                        sourceDirectory,
+                        backupDirectory,
+                        getConfig().getBoolean("silent"),
+                        getConfig().getBoolean("include-nether"),
+                        getConfig().getBoolean("include-end"),
+                        this.getLogger()
+                ),
+                0 ,
+                miliseconds
+        );
     }
 
     @Override

@@ -1,4 +1,7 @@
+automated-backups: true
+prefer-hours: false
 backup-every-hours: 24
+backup-every-minutes: 1
 snapshot-count: 2
 include-nether: true
 include-end: true
