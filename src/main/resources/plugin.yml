@@ -6,3 +6,19 @@ author: Cody West
 website: https://canyonwolf.net
 api-version: '1.19.2'
 load: POSTWORLD
+commands:
+  backup:
+    description: Manually trigger backup
+    usage: /vbsnapshot
+    permission: vacuumbreak.admin
+    permission-message: You do not have permission to use this command.
+  commands:
+    description: List all commands for vacuum break
+    usage: /vbcommands
+    permission: vacuumbreak.admin
+    permission-message: You do not have permission to use this command.
+  reload:
+    description: Reload Vacuum Break configuration
+    usage: /vbreload
+    permission: vacuumbreak.admin
+    permission-message: vacuumbreak.admin
