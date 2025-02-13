@@ -1,6 +1,6 @@
 <h1>Vacuum Break</h1>
 
-**Automated server backups**
+**Automated server backups for Spigot based servers**
 
 Minecraft Java Edition required. Vacuum Break is compatible with Spigot based Minecraft servers.
 
@@ -32,10 +32,10 @@ Configuration is handled using the configuration file generated after first laun
 
 ## Roadmap
 
-1. v0.1.0 - Initial release (Automated Backups).
-2. v0.2.0 - Introduce command structure for manual backups and hot configuration reload.
-3. v0.3.0 - Introduce permission system allowing for server operators to lock down manual backups of files.
-4. v0.4.0 - Cloud backup of files utilizing S3 object storage.
+1. Initial release (Automated Backups). ✅
+2. Introduce command structure for manual backups and hot configuration reload.
+3. Introduce permission system allowing for server operators to lock down manual backups of files.
+4. Cloud backup of files utilizing S3 object storage.
 5. More coming soon!
 
 ## Submitting Changes
