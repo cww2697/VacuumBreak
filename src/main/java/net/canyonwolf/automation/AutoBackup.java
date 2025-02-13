@@ -1,4 +1,6 @@
-package net.canyonwolf;
+package net.canyonwolf.automation;
+
+import net.canyonwolf.service.BackupService;
 
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -40,7 +42,7 @@ public class AutoBackup extends TimerTask {
 
         logger.info("Starting automated backup...");
         long start = System.nanoTime();
-        BackupService.backup(sourceDirectory, targetDirectory, includeNether, includeEnd);
+        BackupService.createSnapshots(sourceDirectory, targetDirectory, includeNether, includeEnd);
         long elapsed = System.nanoTime() - start;
         float seconds = ((float) elapsed / 1000000000);
         String secondsStr = String.format("%.3f", seconds);

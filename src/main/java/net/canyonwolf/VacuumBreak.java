@@ -1,11 +1,10 @@
 package net.canyonwolf;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import net.canyonwolf.automation.AutoBackup;
+import net.canyonwolf.service.BackupService;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.Calendar;
 import java.util.Timer;
 
 public class VacuumBreak extends JavaPlugin {
@@ -32,10 +31,10 @@ public class VacuumBreak extends JavaPlugin {
                 File.separator + ".." + File.separator + ".." + File.separator;
 
         this.backupDirectory = this.getDataFolder().getPath() +
-                File.separator + getConfig().getString("backup-dir");
+                File.separator + getConfig().getString("snapshot-dir");
 
         try {
-            BackupService.validateBackupDir(this.backupDirectory);
+            BackupService.validateSnapshotDir(this.backupDirectory);
         } catch (Exception e) {
             this.getLogger().severe(e.getMessage());
             this.getLogger().warning("Disabling VacuumBreak...");
