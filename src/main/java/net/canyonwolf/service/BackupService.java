@@ -1,4 +1,4 @@
-package net.canyonwolf;
+package net.canyonwolf.service;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,13 +19,14 @@ public class BackupService {
 
     private static Logger logger;
     private static Boolean silent;
-
     private static int maxSnapshotCount;
+    private static final String overworld = "world";
+    private static final String nether = "world_nether";
+    private static final String end = "world_end";
 
+    public static void createSnapshots(String sourceDir, String targetDir, boolean includeNether, boolean includeEnd) {
 
-    public static void backup(String sourceDir, String targetDir, boolean includeNether, boolean includeEnd) {
-
-        String sdf = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String snapshotTimestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
         if (getCurrentSnapshotCount(targetDir) >= maxSnapshotCount) {
             if (!silent){
@@ -34,72 +35,51 @@ public class BackupService {
             }
         }
 
+        backupWorld(sourceDir, targetDir, overworld, snapshotTimestamp);
+
+        if (includeNether) {
+            backupWorld(sourceDir, targetDir, nether, snapshotTimestamp);
+        }
+
+        if (includeEnd) {
+            backupWorld(sourceDir, targetDir, end, snapshotTimestamp);
+        }
+    }
+
+    private static void backupWorld(
+            String sourceDir,
+            String targetDir,
+            String world,
+            String snapshotTimestamp
+    )
+    {
         try {
             if (!silent) {
                 logger.info("Backup started on world: world");
             }
             long start = System.nanoTime();
-            pack("world", sourceDir + File.separator + "world", targetDir + File.separator + sdf + "_world.zip");
+            pack(
+                    world,
+                    sourceDir + File.separator + world,
+                    targetDir + File.separator + snapshotTimestamp + "_"+world+".zip"
+            );
             long elapsed = System.nanoTime() - start;
             float seconds = ((float) elapsed / 1000000000);
             String secondsStr = String.format("%.3f", seconds);
             if(!silent) {
-                logger.info("Backup completed on world: world (" + secondsStr + " seconds)");
+                logger.info("Backup completed on world: " + world + " (" + secondsStr + " seconds)");
             }
         } catch (RuntimeException e) {
             if (!silent) {
                 logger.warning(e.getMessage());
             }
-            logger.warning("Unable to backup world: world. Skipping...");
+            logger.warning("Unable to backup world: " + world + ". Skipping...");
         }
-
-        if (includeNether) {
-            try {
-                if (!silent) {
-                    logger.info("Backup started on world: world_nether");
-                }
-                long start = System.nanoTime();
-                pack("world_nether", sourceDir + File.separator + "world_the_end", targetDir + File.separator + sdf + "_world_nether.zip");
-                long elapsed = System.nanoTime() - start;
-                float seconds = ((float) elapsed / 1000000000);
-                String secondsStr = String.format("%.3f", seconds);
-                if(!silent) {
-                    logger.info("Backup completed on world: world_nether (" + secondsStr + " seconds)");
-                }
-            } catch (RuntimeException e) {
-                if (!silent) {
-                    logger.warning(e.getMessage());
-                }
-                logger.warning("Unable to backup world: world_nether. Skipping...");
-            }
-        }
-
-        if (includeEnd) {
-            try{
-                if (!silent) {
-                    logger.info("Backup started on world: world_the_end");
-                }
-                long start = System.nanoTime();
-                pack("world_the_end", sourceDir + File.separator + "world_the_end", targetDir + File.separator + sdf + "_world_the_end.zip");
-                long elapsed = System.nanoTime() - start;
-                float seconds = ((float) elapsed / 1000000000);
-                String secondsStr = String.format("%.3f", seconds);
-                if(!silent) {
-                    logger.info("Backup completed on world: world_the_end (" + secondsStr + " seconds)");
-                }
-            } catch (RuntimeException e) {
-                if (!silent) {
-                    logger.warning(e.getMessage());
-                }
-                logger.warning("Unable to backup world: world_the_end. Skipping...");
-            }
-        }
-
     }
 
     private static void pack(String world, String sourceDir, String targetDir) throws RuntimeException{
         Path pp = Paths.get(sourceDir);
-        boolean sourceExists = verifySourceDir(sourceDir, world);
+        boolean sourceExists = validateSourceDir(sourceDir, world);
         if (!sourceExists) {
             return;
         }
@@ -147,7 +127,7 @@ public class BackupService {
         }
     }
 
-    public static void validateBackupDir(String backupDir) throws RuntimeException {
+    public static void validateSnapshotDir(String backupDir) throws RuntimeException {
         Path pp = Paths.get(backupDir);
         if (!pp.toFile().exists()) {
             BackupService.logger.info("Backup directory (" + backupDir + ") does not exist. Creating directory...");
@@ -158,7 +138,7 @@ public class BackupService {
         }
     }
 
-    private static boolean verifySourceDir(String sourceDir, String world) {
+    private static boolean validateSourceDir(String sourceDir, String world) {
         Path pp = Paths.get(sourceDir);
         if (!pp.toFile().exists()) {
             BackupService.logger.warning("Source directory for "+ world + " (" + sourceDir + ") does not exist. Skipping...");
