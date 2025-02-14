@@ -7,18 +7,23 @@ website: https://canyonwolf.net
 api-version: '1.19.2'
 load: POSTWORLD
 commands:
-  backup:
+  vb-snapshot:
     description: Manually trigger backup
-    usage: /vbsnapshot
+    usage: /vb-snapshot [world]
     permission: vacuumbreak.admin
     permission-message: You do not have permission to use this command.
-  commands:
+  vb-commands:
     description: List all commands for vacuum break
-    usage: /vbcommands
+    usage: /vb-commands
     permission: vacuumbreak.admin
     permission-message: You do not have permission to use this command.
-  reload:
+  vb-reload:
     description: Reload Vacuum Break configuration
-    usage: /vbreload
+    usage: /vb-reload
     permission: vacuumbreak.admin
     permission-message: vacuumbreak.admin
+  vb-version:
+    description: Provide version number of Vacuum Break plugin and configuration file.
+    usage: /vb-version
+    permission: vacuumbreak.admin
+    permission-message: You do not have permission to use this command.

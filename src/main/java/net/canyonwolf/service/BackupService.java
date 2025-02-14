@@ -1,5 +1,7 @@
 package net.canyonwolf.service;
 
+import net.canyonwolf.constants.Worlds;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,11 +22,14 @@ public class BackupService {
     private static Logger logger;
     private static Boolean silent;
     private static int maxSnapshotCount;
-    private static final String overworld = "world";
-    private static final String nether = "world_nether";
-    private static final String end = "world_end";
 
-    public static void createSnapshots(String sourceDir, String targetDir, boolean includeNether, boolean includeEnd) {
+    public static void createSnapshots(
+            String sourceDir,
+            String targetDir,
+            boolean includeNether,
+            boolean includeEnd,
+            boolean includeOverworld
+    ) {
 
         String snapshotTimestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
@@ -34,52 +39,61 @@ public class BackupService {
                 removeSnapshot(targetDir);
             }
         }
-
-        backupWorld(sourceDir, targetDir, overworld, snapshotTimestamp);
+        if (includeOverworld) {
+            backupWorld(sourceDir, targetDir, Worlds.overworldPath, snapshotTimestamp);
+        }
 
         if (includeNether) {
-            backupWorld(sourceDir, targetDir, nether, snapshotTimestamp);
+            backupWorld(sourceDir, targetDir, Worlds.netherPath, snapshotTimestamp);
         }
 
         if (includeEnd) {
-            backupWorld(sourceDir, targetDir, end, snapshotTimestamp);
+            backupWorld(sourceDir, targetDir, Worlds.endPath, snapshotTimestamp);
         }
     }
 
     private static void backupWorld(
             String sourceDir,
             String targetDir,
-            String world,
+            String worldPath,
             String snapshotTimestamp
     )
     {
+        String worldName = switch (worldPath) {
+            case Worlds.overworldPath -> Worlds.overworldName;
+            case Worlds.netherPath -> Worlds.netherName;
+            case Worlds.endPath -> Worlds.endName;
+            default -> throw new IllegalStateException("Unexpected value: " + worldPath);
+        };
+
+
         try {
             if (!silent) {
-                logger.info("Backup started on world: world");
+                logger.info("Backup started on world: " + worldName);
             }
             long start = System.nanoTime();
             pack(
-                    world,
-                    sourceDir + File.separator + world,
-                    targetDir + File.separator + snapshotTimestamp + "_"+world+".zip"
+                    worldName,
+                    sourceDir + File.separator + worldPath,
+                    targetDir + File.separator + snapshotTimestamp + "_"+worldPath+".zip"
             );
             long elapsed = System.nanoTime() - start;
             float seconds = ((float) elapsed / 1000000000);
             String secondsStr = String.format("%.3f", seconds);
             if(!silent) {
-                logger.info("Backup completed on world: " + world + " (" + secondsStr + " seconds)");
+                logger.info("Backup completed on world: " + worldName + " (" + secondsStr + " seconds)");
             }
         } catch (RuntimeException e) {
             if (!silent) {
                 logger.warning(e.getMessage());
             }
-            logger.warning("Unable to backup world: " + world + ". Skipping...");
+            logger.warning("Unable to backup world: " + worldName + ". Skipping...");
         }
     }
 
-    private static void pack(String world, String sourceDir, String targetDir) throws RuntimeException{
+    private static void pack(String worldName, String sourceDir, String targetDir) throws RuntimeException{
         Path pp = Paths.get(sourceDir);
-        boolean sourceExists = validateSourceDir(sourceDir, world);
+        boolean sourceExists = validateSourceDir(sourceDir, worldName);
         if (!sourceExists) {
             return;
         }
@@ -95,7 +109,7 @@ public class BackupService {
                 compressDirectory(source, source.getName(), zos);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create backup file for " + world, e);
+            throw new RuntimeException("Failed to create backup file for " + worldName, e);
         }
     }
 
@@ -138,10 +152,10 @@ public class BackupService {
         }
     }
 
-    private static boolean validateSourceDir(String sourceDir, String world) {
+    private static boolean validateSourceDir(String sourceDir, String worldName) {
         Path pp = Paths.get(sourceDir);
         if (!pp.toFile().exists()) {
-            BackupService.logger.warning("Source directory for "+ world + " (" + sourceDir + ") does not exist. Skipping...");
+            BackupService.logger.warning("Source directory for "+ worldName + " (" + sourceDir + ") does not exist. Skipping...");
             return false;
         }
         return true;

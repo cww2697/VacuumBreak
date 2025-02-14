@@ -28,7 +28,9 @@ Configuration is handled using the configuration file generated after first laun
 
 ```snapshot-dir``` Directory to back up files to. Backup directory should be provided with path from ```plugins/vacuumbreak```. (String)
 
-```silent``` switch logging on or off. (Boolean)
+```silent``` Switch logging on or off. (Boolean)
+
+```config-version``` Version of plugin used to create configuration file. (String)
 
 ## Roadmap
 
@@ -40,5 +42,4 @@ Configuration is handled using the configuration file generated after first laun
 
 ## Submitting Changes
 
-Vacuum Break is open source (GPL v3), so note that any contributions made will also be open source. 
-The best way to submit a change to Vacuum Break is to create a fork on GitHub, make any changes needed, and then create a "pull request" on the Vacuum Break repository.
+Vacuum Break is open source (GPL v3), so note that any contributions made will also be open source.

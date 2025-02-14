@@ -7,3 +7,4 @@ include-nether: true
 include-end: true
 snapshot-dir: /backups
 silent: false
+config-version: 0.1.1
