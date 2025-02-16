@@ -26,18 +26,20 @@ Configuration is handled using the configuration file generated after first laun
 
 ```include-end``` Switch backups of The End on or off. (Boolean)
 
-```backup-dir``` Directory to back up files to. Backup directory should be provided with path from ```plugins/vacuumbreak```. (String)
+```snapshot-dir``` Directory to back up files to. Backup directory should be provided with path from ```plugins/vacuumbreak```. (String)
 
-```silent``` switch logging on or off. (Boolean)
+```silent``` Switch logging on or off. (Boolean)
+
+```config-version``` Version of plugin used to create configuration file. (String)
 
 ## Roadmap
 
 1. Initial release (Automated Backups). ✅
 2. Introduce command structure for manual backups and hot configuration reload.
 3. Introduce permission system allowing for server operators to lock down manual backups of files.
-4. Cloud backup of files.
+4. Cloud backup of files utilizing S3 object storage.
 5. More coming soon!
 
 ## Submitting Changes
 
-Vacuum Break is open source (GPL v3), so note that any contributions made will also be open source. 
+Vacuum Break is open source (GPL v3), so note that any contributions made will also be open source.

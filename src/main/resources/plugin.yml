@@ -1,8 +1,14 @@
 name: vacuumbreak
-version: 0.1.0
+version: 0.2.0
 main: net.canyonwolf.VacuumBreak
-description: Automated BackupService for Spigot Servers
+description: Automated SnapshotService for Spigot Servers
 author: Cody West
 website: https://canyonwolf.net
 api-version: '1.19.2'
 load: POSTWORLD
+commands:
+  vb-snapshot:
+    description: Manually trigger backup
+    usage: /vb-snapshot [world]
+    permission: vacuumbreak.admin
+    permission-message: You do not have permission to use this command.
