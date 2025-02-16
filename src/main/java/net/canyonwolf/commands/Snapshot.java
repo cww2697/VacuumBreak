@@ -1,7 +1,7 @@
 package net.canyonwolf.commands;
 
 import net.canyonwolf.constants.Worlds;
-import net.canyonwolf.service.BackupService;
+import net.canyonwolf.service.SnapshotService;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,6 +17,12 @@ public class Snapshot implements CommandExecutor {
     String sourceDirectory;
     String targetDirectory;
 
+    /**
+     * @param logger Java logger
+     * @param config Plugin configuration
+     * @param sourceDirectory Directory to snapshot
+     * @param targetDirectory Snapshot directory
+     */
     public Snapshot(Logger logger, FileConfiguration config, String sourceDirectory, String targetDirectory) {
         this.config = config;
         this.logger = logger;
@@ -24,6 +30,13 @@ public class Snapshot implements CommandExecutor {
         this.targetDirectory = targetDirectory;
     }
 
+    /**
+     * @param sender Command sender
+     * @param cmd Command
+     * @param label Command Label
+     * @param args Command Arguements
+     * @return Success state
+     */
     @Override
     public boolean onCommand(
             @NotNull CommandSender sender,
@@ -61,7 +74,7 @@ public class Snapshot implements CommandExecutor {
             }
         }
 
-        BackupService.createSnapshots(sourceDirectory, targetDirectory, includeNether, includeEnd, includeOverworld);
+        SnapshotService.createSnapshots(sourceDirectory, targetDirectory, includeNether, includeEnd, includeOverworld);
 
         return true;
 

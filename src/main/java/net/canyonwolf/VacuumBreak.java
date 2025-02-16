@@ -2,17 +2,17 @@ package net.canyonwolf;
 
 import net.canyonwolf.automation.AutoBackup;
 import net.canyonwolf.commands.Snapshot;
-import net.canyonwolf.service.BackupService;
+import net.canyonwolf.service.SnapshotService;
+import net.canyonwolf.service.FileService;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.util.Objects;
 import java.util.Timer;
 
 public class VacuumBreak extends JavaPlugin {
 
     String sourceDirectory;
-    String backupDirectory;
+    String snapshotDirectory;
 
     Timer timer;
 
@@ -20,7 +20,7 @@ public class VacuumBreak extends JavaPlugin {
     public void onEnable(){
         saveDefaultConfig();
         getLogger().info("Vacuum Break Enabled");
-        BackupService backup = new BackupService();
+        SnapshotService backup = new SnapshotService();
         backup.setLogger(getLogger());
         backup.setSilent(getConfig().getBoolean("silent"));
         this.buildFilePaths();
@@ -29,18 +29,14 @@ public class VacuumBreak extends JavaPlugin {
             scheduleTask();
         }
 
-        Objects.requireNonNull(this.getCommand("vb-snapshot")).setExecutor(new Snapshot(getLogger(), getConfig(), sourceDirectory, backupDirectory));
+        Objects.requireNonNull(this.getCommand("vb-snapshot")).setExecutor(new Snapshot(getLogger(), getConfig(), sourceDirectory, snapshotDirectory));
     }
 
     private void buildFilePaths() {
-        this.sourceDirectory = this.getDataFolder().getPath() +
-                File.separator + ".." + File.separator + ".." + File.separator;
-
-        this.backupDirectory = this.getDataFolder().getPath() +
-                File.separator + getConfig().getString("snapshot-dir");
-
+        String currentDir = this.getDataFolder().getPath();
+        this.sourceDirectory = FileService.buildWorldDirPath(currentDir);
         try {
-            BackupService.validateSnapshotDir(this.backupDirectory);
+            this.snapshotDirectory = FileService.buildSnapshotDirPath(currentDir, getConfig().getString("snapshot-dir"), this.getLogger());
         } catch (Exception e) {
             this.getLogger().severe(e.getMessage());
             this.getLogger().warning("Disabling VacuumBreak...");
@@ -52,16 +48,16 @@ public class VacuumBreak extends JavaPlugin {
         long milliseconds;
 
         if (!this.getConfig().getBoolean("prefer-hours")) {
-            int minutes = this.getConfig().getInt("backup-every-minutes");
+            int minutes = this.getConfig().getInt("snapshot-every-minutes");
             if (!(minutes > 0)) {
-                throw new IllegalArgumentException("Backup minutes must be a positive integer");
+                throw new IllegalArgumentException("Snapshot minutes must be a positive integer");
             }
 
             milliseconds = minutes * 60000L;
         } else {
-            int hours = this.getConfig().getInt("backup-every-hours");
+            int hours = this.getConfig().getInt("snapshot-every-hours");
             if (!(hours > 0)) {
-                throw new IllegalArgumentException("Backup hours must be a positive integer");
+                throw new IllegalArgumentException("Snapshot hours must be a positive integer");
             }
             milliseconds = hours * 3600000L;
         }
@@ -70,7 +66,7 @@ public class VacuumBreak extends JavaPlugin {
         timer.schedule(
                 new AutoBackup(
                         sourceDirectory,
-                        backupDirectory,
+                        snapshotDirectory,
                         getConfig().getInt("snapshot-count"),
                         getConfig().getBoolean("silent"),
                         getConfig().getBoolean("include-nether"),

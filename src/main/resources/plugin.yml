@@ -1,7 +1,7 @@
 name: vacuumbreak
-version: 0.1.0
+version: 0.2.0
 main: net.canyonwolf.VacuumBreak
-description: Automated BackupService for Spigot Servers
+description: Automated SnapshotService for Spigot Servers
 author: Cody West
 website: https://canyonwolf.net
 api-version: '1.19.2'
@@ -10,20 +10,5 @@ commands:
   vb-snapshot:
     description: Manually trigger backup
     usage: /vb-snapshot [world]
-    permission: vacuumbreak.admin
-    permission-message: You do not have permission to use this command.
-  vb-commands:
-    description: List all commands for vacuum break
-    usage: /vb-commands
-    permission: vacuumbreak.admin
-    permission-message: You do not have permission to use this command.
-  vb-reload:
-    description: Reload Vacuum Break configuration
-    usage: /vb-reload
-    permission: vacuumbreak.admin
-    permission-message: vacuumbreak.admin
-  vb-version:
-    description: Provide version number of Vacuum Break plugin and configuration file.
-    usage: /vb-version
     permission: vacuumbreak.admin
     permission-message: You do not have permission to use this command.
