@@ -1,6 +1,7 @@
 package net.canyonwolf.service;
 
 import net.canyonwolf.constants.Worlds;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +56,7 @@ public class BackupService {
     private static void backupWorld(
             String sourceDir,
             String targetDir,
-            String worldPath,
+            @NotNull String worldPath,
             String snapshotTimestamp
     )
     {
@@ -113,7 +114,7 @@ public class BackupService {
         }
     }
 
-    private static void compressDirectory(File dir, String basePath, ZipOutputStream zos) throws IOException {
+    private static void compressDirectory(@NotNull File dir, String basePath, ZipOutputStream zos) throws IOException {
 
         File[] files = dir.listFiles();
         assert files != null;
@@ -122,6 +123,11 @@ public class BackupService {
                 compressDirectory(file, basePath + "/" + file.getName(), zos);
             } else {
                 if (file.getName().endsWith(".lock")) {
+                    // Exclude Spigot world lock files from archive
+                    continue;
+                }
+                if (file.getName().toLowerCase().endsWith(".ds_store")) {
+                    // Exclude macOS DS_Store file from archive
                     continue;
                 }
 
@@ -198,7 +204,7 @@ public class BackupService {
         Arrays.stream(matchingFiles).forEach(BackupService::deleteSnapshot);
     }
 
-    private static void deleteSnapshot(File snapshotFile) {
+    private static void deleteSnapshot(@NotNull File snapshotFile) {
         boolean success = snapshotFile.delete();
         if (!success) {
             throw new RuntimeException("Failed to delete snapshot " + snapshotFile.getAbsolutePath());

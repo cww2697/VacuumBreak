@@ -14,6 +14,8 @@ public class VacuumBreak extends JavaPlugin {
     String sourceDirectory;
     String backupDirectory;
 
+    Timer timer;
+
     @Override
     public void onEnable(){
         saveDefaultConfig();
@@ -78,10 +80,21 @@ public class VacuumBreak extends JavaPlugin {
                 0 ,
                 milliseconds
         );
+
+        this.timer = timer;
     }
 
     @Override
     public void onDisable(){
+        if (this.timer != null) {
+            this.timer.cancel();
+            getLogger().info("Auto-backup stopped...");
+            try{
+                wait(5000);
+            } catch(InterruptedException e) {
+                getLogger().severe(e.getMessage());
+            }
+        }
         getLogger().info("Vacuum Break Disabled");
     }
 
