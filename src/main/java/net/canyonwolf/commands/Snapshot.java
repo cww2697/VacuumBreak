@@ -49,6 +49,11 @@ public class Snapshot implements CommandExecutor {
         boolean includeNether = false;
         boolean includeEnd = false;
 
+        if (args.length == 0) {
+            SnapshotService.createSnapshots(sourceDirectory, targetDirectory, true, true, true);
+            return true;
+        }
+
         for (String arg : args) {
             switch (arg) {
                 case Worlds.overworldName:

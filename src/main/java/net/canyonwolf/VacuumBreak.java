@@ -82,15 +82,6 @@ public class VacuumBreak extends JavaPlugin {
 
     @Override
     public void onDisable(){
-        if (this.timer != null) {
-            this.timer.cancel();
-            getLogger().info("Auto-backup stopped...");
-            try{
-                wait(5000);
-            } catch(InterruptedException e) {
-                getLogger().severe(e.getMessage());
-            }
-        }
         getLogger().info("Vacuum Break Disabled");
     }
 
